@@ -10,8 +10,7 @@ class OrcConan(ConanFile):
     homepage = 'https://github.com/GStreamer/orc'
     license = "BSD"
     patch = "gtkdoc-disabled.patch"
-    patch_dllexport = "windows-dllexport.patch"
-    exports = ["COPYING", patch, patch_dllexport]
+    exports = ["COPYING", patch]
     generators = "gcc","visual_studio"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -35,8 +34,6 @@ class OrcConan(ConanFile):
         url_ = 'https://github.com/GStreamer/orc/archive/orc-{version}.tar.gz'.format(version=self.version)
         tools.get(url_)
         tools.patch(patch_file=self.patch)
-        if self.settings.os == 'Windows':
-            tools.patch(patch_file=self.patch_dllexport)
         extracted_dir = self.name + "-" + self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)   
 
