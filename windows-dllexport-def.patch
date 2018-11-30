@@ -10,3 +10,22 @@ diff -Nur orc-orc-0.4.28/orc/meson.build orc-orc-0.4.28-dllexport/orc/meson.buil
  endif
  
  # FIXME: what about shared and/or static lib? look at options?
+diff -Nur orc-orc-0.4.28/orc-test/meson.build orc-orc-0.4.28-dllexport/orc-test/meson.build
+--- orc-orc-0.4.28/orc-test/meson.build	2017-11-20 07:15:58.000000000 -0800
++++ orc-orc-0.4.28-dllexport/orc-test/meson.build	2018-11-30 05:09:28.784506255 -0800
+@@ -3,9 +3,15 @@
+ 
+ install_headers(orc_test_headers, subdir : 'orc-' + orc_api + '/orc-test')
+ 
++if cc.get_id() == 'msvc'
++  link_args = ['/DEF:' + meson.current_source_dir() + '/orc-test.def']
++endif
++
+ orc_test_lib = shared_library('orc-test-' + orc_api, orc_test_sources,
+   c_args : [ orc_c_args , '-DORC_ENABLE_UNSTABLE_API' ],
+   dependencies : [libm, orc_dep],
++  link_args : link_args,
++  link_depends : 'orc-test.def',
+   install : true)
+ 
+ orc_test_dep = declare_dependency(include_directories : orc_inc,
