@@ -1,4 +1,4 @@
-LIBRARY    orc-0.4-0
+LIBRARY    orc-0.4-0.dll
 EXPORTS
 orc_arm_add_fixup
 orc_arm_cond_name

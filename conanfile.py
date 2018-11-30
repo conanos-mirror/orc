@@ -12,9 +12,10 @@ class OrcConan(ConanFile):
     license = "BSD"
     patch = "gtkdoc-disabled.patch"
     patch_def = "windows-dllexport-def.patch"
-    windows_def = "orc.def"
+    orc_def = "orc.def"
+    orc_test_def = "orc-test.def"
     exports = ["COPYING", patch, patch_def]
-    exports_sources = windows_def
+    exports_sources = [orc_def, orc_test_def]
     generators = "gcc","visual_studio"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -43,8 +44,10 @@ class OrcConan(ConanFile):
         extracted_dir = self.name + "-" + self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
         if self.settings.os == "Windows":
-            shutil.copyfile(os.path.join(self.source_folder,self.windows_def), 
-                            os.path.join(self.source_folder,self._source_subfolder,"orc",self.windows_def))
+            shutil.copyfile(os.path.join(self.source_folder,self.orc_def), 
+                            os.path.join(self.source_folder,self._source_subfolder,"orc",self.orc_def))
+            shutil.copyfile(os.path.join(self.source_folder,self.orc_test_def), 
+                            os.path.join(self.source_folder,self._source_subfolder,"orc-test",self.orc_test_def))
 
     def build(self):
         prefix = os.path.join(self.build_folder, self._build_subfolder, "install")
