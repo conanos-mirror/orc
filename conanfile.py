@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools, Meson
 from conanos.build import config_scheme
 import os
+import shutil
 
 class OrcConan(ConanFile):
     name = "orc"
@@ -10,7 +11,9 @@ class OrcConan(ConanFile):
     homepage = 'https://github.com/GStreamer/orc'
     license = "BSD"
     patch = "gtkdoc-disabled.patch"
+    windows_def = "orc-0.4.def"
     exports = ["COPYING", patch]
+    exports_sources = windows_def
     generators = "gcc","visual_studio"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -35,7 +38,10 @@ class OrcConan(ConanFile):
         tools.get(url_)
         tools.patch(patch_file=self.patch)
         extracted_dir = self.name + "-" + self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)   
+        os.rename(extracted_dir, self._source_subfolder)
+        if self.settings.os == "Windows":
+            shutil.copyfile(os.path.join(self.source_folder,self.windows_def), 
+                            os.path.join(self.source_folder,self._source_subfolder,"orc",self.windows_def))
 
     def build(self):
         prefix = os.path.join(self.build_folder, self._build_subfolder, "install")
