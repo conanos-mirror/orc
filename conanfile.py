@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools, Meson
+from conanos.build import config_scheme
 import os
 
 class OrcConan(ConanFile):
@@ -6,45 +7,47 @@ class OrcConan(ConanFile):
     version = "0.4.28"
     description = "Optimized Inner Loop Runtime Compiler"
     url = "https://github.com/conanos/orc"
-    homepage = 'https://cgit.freedesktop.org/gstreamer/orc'
+    homepage = 'https://github.com/GStreamer/orc'
     license = "BSD"
+    exports = ["COPYING"]
+    generators = "gcc","visual_studio"
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = "shared=True"
-    generators = "cmake"
+    options = {
+        "shared": [True, False],
+        'fPIC': [True, False]
+    }
+    default_options = { 'shared': False, 'fPIC': True }
+    _source_subfolder = "source_subfolder"
+    _build_subfolder = "build_subfolder"
+    
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
-    source_subfolder = "source_subfolder"
+        config_scheme(self)
+    
+    def configure(self):
+        del self.settings.compiler.libcxx
 
     def source(self):
-        tarball_name = '{name}-{version}.tar'.format(name=self.name, version=self.version)
-        archive_name = '%s.xz' % tarball_name
-        url_ = 'https://gstreamer.freedesktop.org/src/orc/%s'%(archive_name)
-        tools.download(url_, archive_name)
-
-        if self.settings.os == 'Windows':
-            self.run('7z x %s' % archive_name)
-            self.run('7z x %s' % tarball_name)
-            os.unlink(tarball_name)
-        else:
-            self.run('tar -xJf %s' % archive_name)
-        os.rename('%s-%s' %(self.name, self.version), self.source_subfolder)
-        os.unlink(archive_name)
+        url_ = 'https://github.com/GStreamer/orc/archive/orc-{version}.tar.gz'.format(version=self.version)
+        tools.get(url_)
+        extracted_dir = self.name + "-" + self.name + "-" + self.version
+        os.rename(extracted_dir, self._source_subfolder)   
 
     def build(self):
-        with tools.chdir(self.source_subfolder):
-            meson = Meson(self)
-            meson.configure(
-                defs={'prefix':'%s/builddir/install'%(os.getcwd()), 'libdir':'lib'},
-                source_dir = '%s'%(os.getcwd()),
-                build_dir= '%s/builddir'%(os.getcwd()),
-                )
-            meson.build(args=['-j2'])
-            self.run('ninja -C {0} install'.format(meson.build_dir))
+        prefix = os.path.join(self.build_folder, self._build_subfolder, "install")
+        defs = {'prefix' : prefix}
+        if self.settings.os == "Linux":
+            defs.update({'libdir':'lib'})
+        meson = Meson(self)
+        meson.configure(defs=defs, source_dir = self._source_subfolder,
+                        build_dir=self._build_subfolder)
+        meson.build()
+        self.run('ninja -C {0} install'.format(meson.build_dir))
 
     def package(self):
-        if tools.os_info.is_linux:
-            with tools.chdir(self.source_subfolder):
-                self.copy("*", src="%s/builddir/install"%(os.getcwd()))
+        self.copy("*", dst=self.package_folder, src=os.path.join(self.build_folder,self._build_subfolder, "install"))
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
