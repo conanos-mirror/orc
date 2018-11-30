@@ -1,0 +1,16 @@
+diff -Nur orc-orc-0.4.28/meson.build orc-orc-0.4.28-doc-disabled/meson.build
+--- orc-orc-0.4.28/meson.build	2017-11-20 07:15:58.000000000 -0800
++++ orc-orc-0.4.28-doc-disabled/meson.build	2018-11-30 01:56:57.806996134 -0800
+@@ -113,9 +113,9 @@
+ subdir('examples')
+ subdir('testsuite')
+ 
+-if not meson.is_cross_build() and host_os != 'windows'
+-  subdir('doc')
+-endif
++#if not meson.is_cross_build() and host_os != 'windows'
++#  subdir('doc')
++#endif
+ 
+ pc_conf.set('prefix', get_option('prefix'))
+ pc_conf.set('exec_prefix', get_option('prefix'))

@@ -9,7 +9,8 @@ class OrcConan(ConanFile):
     url = "https://github.com/conanos/orc"
     homepage = 'https://github.com/GStreamer/orc'
     license = "BSD"
-    exports = ["COPYING"]
+    patch = "gtkdoc-disabled.patch"
+    exports = ["COPYING", patch]
     generators = "gcc","visual_studio"
     settings = "os", "compiler", "build_type", "arch"
     options = {
@@ -32,6 +33,7 @@ class OrcConan(ConanFile):
     def source(self):
         url_ = 'https://github.com/GStreamer/orc/archive/orc-{version}.tar.gz'.format(version=self.version)
         tools.get(url_)
+        tools.patch(patch_file=self.patch)
         extracted_dir = self.name + "-" + self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)   
 
@@ -41,8 +43,7 @@ class OrcConan(ConanFile):
         if self.settings.os == "Linux":
             defs.update({'libdir':'lib'})
         meson = Meson(self)
-        meson.configure(defs=defs, source_dir = self._source_subfolder,
-                        build_dir=self._build_subfolder)
+        meson.configure(defs=defs, source_dir = self._source_subfolder,build_dir=self._build_subfolder)
         meson.build()
         self.run('ninja -C {0} install'.format(meson.build_dir))
 
