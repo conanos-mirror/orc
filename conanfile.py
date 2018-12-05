@@ -22,18 +22,19 @@ class OrcConan(ConanFile):
         "shared": [True, False],
         'fPIC': [True, False]
     }
-    default_options = { 'shared': False, 'fPIC': True }
+    default_options = { 'shared': True, 'fPIC': True }
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        config_scheme(self)
+        
     
     def configure(self):
         del self.settings.compiler.libcxx
+
+        config_scheme(self)
 
     def source(self):
         url_ = 'https://github.com/GStreamer/orc/archive/orc-{version}.tar.gz'.format(version=self.version)
